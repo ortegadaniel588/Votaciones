@@ -1,11 +1,15 @@
-from Modelos.Candidato import Candidato
 from Repositorios.RepositorioCandidato import RepositorioCandidato
+from Repositorios.RepositorioPartido import RepositorioPartido
+from Modelos.Candidato import Candidato
+from Modelos.Partido import Partido
 
 
 class ControladorCandidato():
     def __init__(self):
         # Se crea una instancia del RepositorioEstudiante para interactuar con la base de datos
         self.repositorioCandidato = RepositorioCandidato()
+        self.repositorioPartido = RepositorioPartido()
+
 
     def index(self):
         # Retorna todos los estudiantes existentes en la base de datos
@@ -41,3 +45,9 @@ class ControladorCandidato():
     def delete(self, id):
         # Elimina un estudiante por su ID desde la base de datos utilizando el repositorio
         return self.repositorioCandidato.delete(id)
+
+    def asignarPartido(self, id, id_partido):
+        candidatoActual = Candidato(self.repositorioCandidato.findById(id))
+        partidoActual = Partido(self.repositorioPartido.findById(id_partido))
+        candidatoActual.partido = partidoActual
+        return self.repositorioCandidato.save(candidatoActual)

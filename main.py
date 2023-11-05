@@ -6,8 +6,8 @@ import json
 from waitress import serve
 from Controladores.ControladorMesa import ControladorMesa
 from Controladores.ControladorPartido import ControladorPartido
-from Controladores.ControladorResultado import ControladorResultado
 from Controladores.ControladorCandidato import ControladorCandidato
+from Controladores.ControladorResultado import ControladorResultado
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -60,6 +60,12 @@ def eliminarCandidato(id):
     return jsonify(json)
 
 
+@app.route("/candidatos/<string:id>/partido/<string:id_partido>", methods=['PUT'])
+def asignarPartidoACandidato(id, id_partido):
+    json = miControladorCandidato.asignarPartido(id, id_partido)
+    return jsonify(json)
+
+
 ## fin peticion candidato
 
 
@@ -109,29 +115,47 @@ def getResultados():
     return jsonify(json)
 
 
-@app.route("/resultados", methods=['POST'])
-def crearResultado():
-    data = request.get_json()
-    json = miControladorCandidato.create(data)
-    return jsonify(json)
-
-
 @app.route("/resultados/<string:id>", methods=['GET'])
 def getResultado(id):
     json = miControladorResultado.show(id)
     return jsonify(json)
 
 
-@app.route("/resultados/<string:id>", methods=['PUT'])
-def modificarResultado(id):
+@app.route("/resultados/candidato/<string:id_candidato>/mesa/<string:id_mesa>", methods=['POST'])
+def crearResultado(id_candidato, id_mesa):
     data = request.get_json()
-    json = miControladorResultado.update(id, data)
+    json = miControladorResultado.create(data, id_candidato, id_mesa)
     return jsonify(json)
 
 
-@app.route("/resultados/<string:id>", methods=['DELETE'])
-def eliminarResultado(id):
-    json = miControladorResultado.delete(id)
+@app.route("/resultados/<string:id_resultado>/candidato/<string:id_candidato>/mesa/<string:id_mesa>", methods=['PUT'])
+def modificarResultado(id_resultado, id_candidato, id_mesa):
+    data = request.get_json()
+    json = miControladorResultado.update(id_resultado, data, id_candidato, id_mesa)
+    return jsonify(json)
+
+
+@app.route("/resultados/<string:id_resultado>", methods=['DELETE'])
+def eliminarResultado(id_resultado):
+    json = miControladorResultado.delete(id_resultado)
+    return jsonify(json)
+
+
+@app.route("/resultados/mesa/<string:id_mesa>", methods=['GET'])
+def inscritosEnMesa(id_mesa):
+    json = miControladorResultado.listarResultadosEnMesa(id_mesa)
+    return jsonify(json)
+
+
+@app.route("/resultados/resultados_mayores", methods=['GET'])
+def getResultadosMayores():
+    json = miControladorResultado.resultadosMasAltasPorCurso()
+    return jsonify(json)
+
+
+@app.route("/resultados/promedio_resultados/mesa/<string:id_mesa>", methods=['GET'])
+def getPromedioResultadosEnMesa(id_mesa):
+    json = miControladorResultado.promedioResultadosEnMesa(id_mesa)
     return jsonify(json)
 
 

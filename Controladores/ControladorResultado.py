@@ -1,42 +1,54 @@
 from Modelos.Resultado import Resultado
+from Modelos.Candidato import Candidato
+from Modelos.Mesa import Mesa
 from Repositorios.RepositorioResultado import RepositorioResultado
+from Repositorios.RepositorioCandidato import RepositorioCandidato
+from Repositorios.RepositorioMesa import RepositorioMesa
 
 
 class ControladorResultado():
     def __init__(self):
         # Se crea una instancia del RepositorioEstudiante para interactuar con la base de datos
         self.repositorioResultado = RepositorioResultado()
+        self.repositorioCandidatos = RepositorioCandidato()
+        self.repositorioMesas = RepositorioMesa()
 
     def index(self):
         # Retorna todos los estudiantes existentes en la base de datos
         return self.repositorioResultado.findAll()
 
-    def create(self, infoResultado):
-        # Crea un nuevo objeto Estudiante a partir de la información recibida
+    def create(self, infoResultado, id_candidato, id_mesa):
         nuevoResultado = Resultado(infoResultado)
-
-        # Guarda el nuevo estudiante en la base de datos utilizando el repositorio
+        elCandidato = Candidato(self.repositorioCandidatos.findById(id_candidato))
+        laMesa = Mesa(self.repositorioMesas.findById(id_mesa))
+        nuevoResultado.candidato = elCandidato
+        nuevoResultado.mesa = laMesa
         return self.repositorioResultado.save(nuevoResultado)
 
     def show(self, id):
-        # Obtiene un estudiante por su ID desde la base de datos utilizando el repositorio
         elResultado = Resultado(self.repositorioResultado.findById(id))
-
-        # Retorna los atributos del estudiante como un diccionario
         return elResultado.__dict__
 
-    def update(self, id, infoResultado):
-        # Obtiene el estudiante actual por su ID desde la base de datos utilizando el repositorio
-        resultadoActual = Resultado(self.repositorioResultado.findById(id))
-
-        # Actualiza los atributos del estudiante con la información recibida
-        resultadoActual.id = infoResultado["id"]
-        resultadoActual.numero_mesa = infoResultado["numero_mesa"]
-        resultadoActual.id_partido = infoResultado["id_partido"]
-
-        # Guarda los cambios del estudiante actualizado en la base de datos utilizando el repositorio
-        return self.repositorioResultado.save(resultadoActual)
+    def update(self, id, infoResultado, id_candidato, id_mesa):
+        elResultado = Resultado(self.repositorioResultado.findById(id))
+        elResultado.id = infoResultado["id"]
+        elResultado.numero_mesa = infoResultado["numero_mesa"]
+        elResultado.resultado = infoResultado["resultado"]
+        elCandidato = Candidato(self.repositorioCandidatos.findById(id_candidato))
+        laMesa = Mesa(self.repositorioMesas.findById(id_mesa))
+        elResultado.candidato = elCandidato
+        elResultado.mesa = laMesa
+        return self.repositorioResultado.save(elResultado)
 
     def delete(self, id):
-        # Elimina un estudiante por su ID desde la base de datos utilizando el repositorio
         return self.repositorioResultado.delete(id)
+
+    def listarResultadosEnMesa(self, id_mesa):
+        return self.repositorioResultado.getListadoResultadosEnMesa(id_mesa)
+
+    def resultadosMasAltasPorCurso(self):
+        return self.repositorioResultado.getMayorResultadoPorMesa()
+
+    # obtener el promedio de las notas
+    def promedioResultadosEnMesa(self, id_mesa):
+        return self.repositorioResultado.promedioResultadosEnMesa(id_mesa)
